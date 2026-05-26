@@ -21,6 +21,9 @@ st.title("😃 AI 表情识别系统（图片 / 摄像头 / 视频）")
 
 classes = ["angry", "disgust", "fear", "happy", "neutral", "sad", "surprise"]
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+BASE_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = BASE_DIR.parent
+DEFAULT_PT_MODEL_PATH = PROJECT_ROOT / "models" / "emotion.pt"
 
 transform = transforms.Compose([
     transforms.Resize((48, 48)),
@@ -31,9 +34,12 @@ transform = transforms.Compose([
 
 @st.cache_resource
 def load_default_pt_model():
+    if not DEFAULT_PT_MODEL_PATH.exists():
+        raise FileNotFoundError(f"默认模型不存在：{DEFAULT_PT_MODEL_PATH}")
+
     model = models.resnet18()
     model.fc = nn.Linear(model.fc.in_features, len(classes))
-    model.load_state_dict(torch.load("../models/emotion.pt", map_location="cpu"))
+    model.load_state_dict(torch.load(str(DEFAULT_PT_MODEL_PATH), map_location="cpu"))
     model.eval()
     return model.to(device)
 
@@ -193,7 +199,10 @@ pt_model = None
 onnx_session = None
 
 if model_source == "默认 PT 模型":
-    pt_model = load_default_pt_model()
+    try:
+        pt_model = load_default_pt_model()
+    except FileNotFoundError as exc:
+        st.sidebar.error(str(exc))
 else:
     uploaded_model = st.sidebar.file_uploader("上传模型", type=["pt", "onnx"])
     if uploaded_model is not None:
