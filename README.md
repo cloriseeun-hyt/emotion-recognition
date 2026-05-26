@@ -312,6 +312,8 @@ models/emotion.pt
 
 ## 14. 作者说明
 
+项目仓库链接：https://github.com/cloriseeun-hyt/emotion-recognition
+
 本项目为课程作业项目，基于 PyTorch 完成图像分类方向的人脸表情识别系统实现。
 
 如用于课程答辩，建议配合：
